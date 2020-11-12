@@ -260,6 +260,7 @@
     <ClInclude Include="Content\Sample3DSceneRenderer.h" />
     <ClInclude Include="Content\SampleFpsTextRenderer.h" />
     <ClInclude Include="Content\ShaderStructures.h" />
+    <ClInclude Include="Octaedr.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

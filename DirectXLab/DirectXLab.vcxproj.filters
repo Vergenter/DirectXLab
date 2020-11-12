@@ -62,6 +62,9 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
       <Filter>Assets</Filter>
     </Image>
+    <Filter Include="MyFunction">
+      <UniqueIdentifier>{087fdb57-de8e-4d18-b32a-48c850c95e98}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
@@ -72,6 +75,9 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="DirectXLabMain.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Octaedr.h">
+      <Filter>MyFunction</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">
