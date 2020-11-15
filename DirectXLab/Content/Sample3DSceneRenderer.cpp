@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "Sample3DSceneRenderer.h"
-
 #include "..\Common\DirectXHelper.h"
+#include "WICTextureLoader.h"
 
 using namespace DirectXLab;
 
@@ -127,6 +127,25 @@ void Sample3DSceneRenderer::Render()
 		0,
 		0
 		);
+	ID3D11RenderTargetView* const targets[1] = { m_deviceResources->GetBackBufferRenderTargetView() };
+	context->OMSetRenderTargets(
+		1,
+		targets,
+		m_deviceResources->GetDepthStencilView()
+	);
+
+	const float clearColor[4] = { 0.071f, 0.04f, 0.561f, 1.0f };
+	context->ClearRenderTargetView(
+		m_deviceResources->GetBackBufferRenderTargetView(),
+		clearColor
+	);
+
+	context->ClearDepthStencilView(
+		m_deviceResources->GetDepthStencilView(),
+		D3D11_CLEAR_DEPTH,
+		1.0f,
+		0
+	);
 
 	// Each vertex is one instance of the VertexPositionColor struct.
 	UINT stride = sizeof(VertexForTexture);
@@ -172,6 +191,17 @@ void Sample3DSceneRenderer::Render()
 		0
 		);
 
+	context->PSSetShaderResources(
+		0,
+		1,
+		m_textureShaderResourceView.GetAddressOf()
+		);
+
+	context->PSSetSamplers(
+		0,
+		1,
+		m_sampler.GetAddressOf()
+		);
 	// Draw the objects.
 	context->DrawIndexed(
 		m_indexCount,
@@ -185,6 +215,46 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 	// Load shaders asynchronously.
 	auto loadVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso");
 	auto loadPSTask = DX::ReadDataAsync(L"SamplePixelShader.cso");
+	{
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+
+		CreateWICTextureFromFile(m_deviceResources->GetD3DDevice(), m_deviceResources->GetD3DDeviceContext(), L"Assets\\checker.png", (ID3D11Resource**)texture.GetAddressOf(), m_textureShaderResourceView.GetAddressOf(),1024);
+		// Once the texture view is created, create a sampler.  This defines how the color
+		// for a particular texture coordinate is determined using the relevant texture data.
+		D3D11_SAMPLER_DESC samplerDesc;
+		ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+
+		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+
+		// The sampler does not use anisotropic filtering, so this parameter is ignored.
+		samplerDesc.MaxAnisotropy = 0;
+
+		// Specify how texture coordinates outside of the range 0..1 are resolved.
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+
+		// Use no special MIP clamping or bias.
+		samplerDesc.MipLODBias = 0.0f;
+		samplerDesc.MinLOD = 0;
+		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+		// Don't use a comparison function.
+		samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+
+		// Border address mode is not used, so this parameter is ignored.
+		samplerDesc.BorderColor[0] = 0.0f;
+		samplerDesc.BorderColor[1] = 0.0f;
+		samplerDesc.BorderColor[2] = 0.0f;
+		samplerDesc.BorderColor[3] = 0.0f;
+
+		DX::ThrowIfFailed(
+			m_deviceResources->GetD3DDevice()->CreateSamplerState(
+				&samplerDesc,
+				&m_sampler
+			)
+		);
+	};
 
 	// After the vertex shader file is loaded, create the shader and input layout.
 	auto createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData) {
@@ -249,20 +319,20 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 		{DirectX::XMFLOAT3(0.0f, 0.0f, 0.5f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
 		{DirectX::XMFLOAT3(0.0f, 0.5f, 0.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 1.0f)},
 
-		{DirectX::XMFLOAT3(0.0f, 0.0f, 0.5f), DirectX::XMFLOAT3(-1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
-		{DirectX::XMFLOAT3(-0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(-1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
+		{DirectX::XMFLOAT3(-0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(-1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
+		{DirectX::XMFLOAT3(0.0f, 0.0f, 0.5f), DirectX::XMFLOAT3(-1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
 		{DirectX::XMFLOAT3(0.0f, -0.5f, 0.0f), DirectX::XMFLOAT3(-1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 1.0f)},
 
-		{DirectX::XMFLOAT3(-0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(-1.0f, 1.0f, -1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
-		{DirectX::XMFLOAT3(0.0f, 0.0f, -0.5f), DirectX::XMFLOAT3(-1.0f, 1.0f, -1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
+		{DirectX::XMFLOAT3(0.0f, 0.0f, -0.5f), DirectX::XMFLOAT3(-1.0f, 1.0f, -1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
+		{DirectX::XMFLOAT3(-0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(-1.0f, 1.0f, -1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
 		{DirectX::XMFLOAT3(0.0f, -0.5f, 0.0f), DirectX::XMFLOAT3(-1.0f, 1.0f, -1.0f),DirectX::XMFLOAT2(1.0f, 1.0f)},
 
-		{DirectX::XMFLOAT3(0.0f, 0.0f,-0.5f), DirectX::XMFLOAT3(1.0f, -1.0f,-1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
-		{DirectX::XMFLOAT3(0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, -1.0f,-1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
+		{DirectX::XMFLOAT3(0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, -1.0f,-1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
+		{DirectX::XMFLOAT3(0.0f, 0.0f,-0.5f), DirectX::XMFLOAT3(1.0f, -1.0f,-1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
 		{DirectX::XMFLOAT3(0.0f, -0.5f, 0.0f), DirectX::XMFLOAT3(1.0f, -1.0f,-1.0f),DirectX::XMFLOAT2(1.0f, 1.0f)},
 
-		{DirectX::XMFLOAT3(0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
-		{DirectX::XMFLOAT3(0.0f, 0.0f, 0.5f), DirectX::XMFLOAT3(1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
+		{DirectX::XMFLOAT3(0.0f, 0.0f, 0.5f), DirectX::XMFLOAT3(1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
+		{DirectX::XMFLOAT3(0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
 		{DirectX::XMFLOAT3(0.0f, -0.5f, 0.0f), DirectX::XMFLOAT3(1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 1.0f)},
 
 		{DirectX::XMFLOAT3(0.0f, 0.0f, 0.5f), DirectX::XMFLOAT3(-1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
@@ -325,12 +395,12 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 	// Specify the view transform corresponding to a camera position of
 	// X = 0, Y = 1, Z = 2.  For a generalized camera class, see Lesson 5.
 
-	m_constantBufferData.view = DirectX::XMFLOAT4X4(
-		-1.00000000f, 0.00000000f, 0.00000000f, 0.00000000f,
-		0.00000000f, 0.89442718f, 0.44721359f, 0.00000000f,
-		0.00000000f, 0.44721359f, -0.89442718f, -2.23606800f,
-		0.00000000f, 0.00000000f, 0.00000000f, 1.00000000f
-	);
+	//m_constantBufferData.view = DirectX::XMFLOAT4X4(
+	//	-1.00000000f, 0.00000000f, 0.00000000f, 0.00000000f,
+	//	0.00000000f, 0.89442718f, 0.44721359f, 0.00000000f,
+	//	0.00000000f, 0.44721359f, -0.89442718f, -2.23606800f,
+	//	0.00000000f, 0.00000000f, 0.00000000f, 1.00000000f
+	//);
 
 	// Once the cube is loaded, the object is ready to be rendered.
 	createCubeTask.then([this] () {

@@ -70,6 +70,9 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="DirectXLabMain.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="WICTextureLoader.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -78,9 +81,15 @@
     <ClInclude Include="Octaedr.h">
       <Filter>MyFunction</Filter>
     </ClInclude>
+    <ClInclude Include="WICTextureLoader.h">
+      <Filter>Content</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\checker.png">
       <Filter>Assets</Filter>
     </Image>
   </ItemGroup>

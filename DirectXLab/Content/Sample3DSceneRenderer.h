@@ -36,7 +36,9 @@ namespace DirectXLab
 		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_vertexShader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_pixelShader;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_constantBuffer;
-
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_renderTargetView;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureShaderResourceView;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> m_sampler;
 		// System resources for cube geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
 		uint32	m_indexCount;
