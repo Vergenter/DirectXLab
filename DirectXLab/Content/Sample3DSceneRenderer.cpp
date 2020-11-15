@@ -74,8 +74,8 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
 		double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
 		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
-
 		Rotate(radians);
+		Oscilate(radians);
 	}
 }
 
@@ -83,9 +83,12 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 void Sample3DSceneRenderer::Rotate(float radians)
 {
 	// Prepare to pass the updated model matrix to the shader
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationY(radians)));
+	//XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationY(radians)));
 }
-
+void Sample3DSceneRenderer::Oscilate(float radians) {
+	// Prepare to pass the updated model matrix to the shader
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixTranslation(sinf(radians) , 0, 0)));
+}
 void Sample3DSceneRenderer::StartTracking()
 {
 	m_tracking = true;
@@ -98,6 +101,7 @@ void Sample3DSceneRenderer::TrackingUpdate(float positionX)
 	{
 		float radians = XM_2PI * 2.0f * positionX / m_deviceResources->GetOutputSize().Width;
 		Rotate(radians);
+		Oscilate(radians);
 	}
 }
 
@@ -313,35 +317,35 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 		static const VertexForTexture cubeVertices[] = {
 		{DirectX::XMFLOAT3(0.0f, 0.0f,-0.5f), DirectX::XMFLOAT3(1.0f, 1.0f,-1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
 		{DirectX::XMFLOAT3(0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, 1.0f,-1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
-		{DirectX::XMFLOAT3(0.0f, 0.5f, 0.0f), DirectX::XMFLOAT3(1.0f, 1.0f,-1.0f),DirectX::XMFLOAT2(1.0f, 1.0f)},
+		{DirectX::XMFLOAT3(0.0f, 0.5f, 0.0f), DirectX::XMFLOAT3(1.0f, 1.0f,-1.0f),DirectX::XMFLOAT2(0.5f, 1.0f)},
 
 		{DirectX::XMFLOAT3(0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
 		{DirectX::XMFLOAT3(0.0f, 0.0f, 0.5f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
-		{DirectX::XMFLOAT3(0.0f, 0.5f, 0.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 1.0f)},
+		{DirectX::XMFLOAT3(0.0f, 0.5f, 0.0f), DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(0.5f, 1.0f)},
 
 		{DirectX::XMFLOAT3(-0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(-1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
 		{DirectX::XMFLOAT3(0.0f, 0.0f, 0.5f), DirectX::XMFLOAT3(-1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
-		{DirectX::XMFLOAT3(0.0f, -0.5f, 0.0f), DirectX::XMFLOAT3(-1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 1.0f)},
+		{DirectX::XMFLOAT3(0.0f, -0.5f, 0.0f), DirectX::XMFLOAT3(-1.0f, 1.0f, 1.0f),DirectX::XMFLOAT2(0.5f, 1.0f)},
 
 		{DirectX::XMFLOAT3(0.0f, 0.0f, -0.5f), DirectX::XMFLOAT3(-1.0f, 1.0f, -1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
 		{DirectX::XMFLOAT3(-0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(-1.0f, 1.0f, -1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
-		{DirectX::XMFLOAT3(0.0f, -0.5f, 0.0f), DirectX::XMFLOAT3(-1.0f, 1.0f, -1.0f),DirectX::XMFLOAT2(1.0f, 1.0f)},
+		{DirectX::XMFLOAT3(0.0f, -0.5f, 0.0f), DirectX::XMFLOAT3(-1.0f, 1.0f, -1.0f),DirectX::XMFLOAT2(0.5f, 1.0f)},
 
 		{DirectX::XMFLOAT3(0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, -1.0f,-1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
 		{DirectX::XMFLOAT3(0.0f, 0.0f,-0.5f), DirectX::XMFLOAT3(1.0f, -1.0f,-1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
-		{DirectX::XMFLOAT3(0.0f, -0.5f, 0.0f), DirectX::XMFLOAT3(1.0f, -1.0f,-1.0f),DirectX::XMFLOAT2(1.0f, 1.0f)},
+		{DirectX::XMFLOAT3(0.0f, -0.5f, 0.0f), DirectX::XMFLOAT3(1.0f, -1.0f,-1.0f),DirectX::XMFLOAT2(0.5f, 1.0f)},
 
 		{DirectX::XMFLOAT3(0.0f, 0.0f, 0.5f), DirectX::XMFLOAT3(1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
 		{DirectX::XMFLOAT3(0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
-		{DirectX::XMFLOAT3(0.0f, -0.5f, 0.0f), DirectX::XMFLOAT3(1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 1.0f)},
+		{DirectX::XMFLOAT3(0.0f, -0.5f, 0.0f), DirectX::XMFLOAT3(1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(0.5f, 1.0f)},
 
 		{DirectX::XMFLOAT3(0.0f, 0.0f, 0.5f), DirectX::XMFLOAT3(-1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
 		{DirectX::XMFLOAT3(-0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(-1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
-		{DirectX::XMFLOAT3(0.0f, 0.5f, 0.0f), DirectX::XMFLOAT3(-1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(1.0f, 1.0f)},
+		{DirectX::XMFLOAT3(0.0f, 0.5f, 0.0f), DirectX::XMFLOAT3(-1.0f, -1.0f, 1.0f),DirectX::XMFLOAT2(0.5f, 1.0f)},
 
 		{DirectX::XMFLOAT3(-0.5f, 0.0f, 0.0f), DirectX::XMFLOAT3(-1.0f, -1.0f, -1.0f),DirectX::XMFLOAT2(0.0f, 0.0f)},
 		{DirectX::XMFLOAT3(0.0f, 0.0f, -0.5f), DirectX::XMFLOAT3(-1.0f, -1.0f, -1.0f),DirectX::XMFLOAT2(1.0f, 0.0f)},
-		{DirectX::XMFLOAT3(0.0f, 0.5f, 0.0f), DirectX::XMFLOAT3(-1.0f, -1.0f, -1.0f),DirectX::XMFLOAT2(1.0f, 1.0f)},
+		{DirectX::XMFLOAT3(0.0f, 0.5f, 0.0f), DirectX::XMFLOAT3(-1.0f, -1.0f, -1.0f),DirectX::XMFLOAT2(0.5f, 1.0f)},
 		};
 
 		CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(cubeVertices), D3D11_BIND_VERTEX_BUFFER);
@@ -395,12 +399,12 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 	// Specify the view transform corresponding to a camera position of
 	// X = 0, Y = 1, Z = 2.  For a generalized camera class, see Lesson 5.
 
-	//m_constantBufferData.view = DirectX::XMFLOAT4X4(
-	//	-1.00000000f, 0.00000000f, 0.00000000f, 0.00000000f,
-	//	0.00000000f, 0.89442718f, 0.44721359f, 0.00000000f,
-	//	0.00000000f, 0.44721359f, -0.89442718f, -2.23606800f,
-	//	0.00000000f, 0.00000000f, 0.00000000f, 1.00000000f
-	//);
+	m_constantBufferData.view = DirectX::XMFLOAT4X4(
+		-1.00000000f, 0.00000000f, 0.00000000f, 0.00000000f,
+		0.00000000f, 0.89442718f, 0.44721359f, 0.00000000f,
+		0.00000000f, 0.44721359f, -0.89442718f, -2.23606800f,
+		0.00000000f, 0.00000000f, 0.00000000f, 1.00000000f
+	);
 
 	// Once the cube is loaded, the object is ready to be rendered.
 	createCubeTask.then([this] () {

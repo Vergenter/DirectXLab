@@ -24,6 +24,7 @@ namespace DirectXLab
 
 	private:
 		void Rotate(float radians);
+		void Oscilate(float radians);
 
 	private:
 		// Cached pointer to device resources.
