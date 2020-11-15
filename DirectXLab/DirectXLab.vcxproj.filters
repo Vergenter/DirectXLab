@@ -84,6 +84,9 @@
     <ClInclude Include="WICTextureLoader.h">
       <Filter>Content</Filter>
     </ClInclude>
+    <ClInclude Include="Views.h">
+      <Filter>Content</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">

@@ -2,6 +2,7 @@
 #include "Sample3DSceneRenderer.h"
 #include "..\Common\DirectXHelper.h"
 #include "WICTextureLoader.h"
+#include "Views.h"
 
 using namespace DirectXLab;
 
@@ -14,7 +15,8 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 	m_degreesPerSecond(45),
 	m_indexCount(0),
 	m_tracking(false),
-	m_deviceResources(deviceResources)
+	m_deviceResources(deviceResources),
+	m_pathLenght(1.0f)
 {
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
@@ -57,12 +59,7 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 		XMMatrixTranspose(perspectiveMatrix * orientationMatrix)
 		);
 
-	// Eye is at (0,0.7,1.5), looking at point (0,-0.1,0) with the up-vector along the y-axis.
-	static const XMVECTORF32 eye = { 0.0f, 0.7f, 1.5f, 0.0f };
-	static const XMVECTORF32 at = { 0.0f, -0.1f, 0.0f, 0.0f };
-	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
-
-	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
+	XMStoreFloat4x4(&m_constantBufferData.view, CustomViews::Views[0]);
 }
 
 // Called once per frame, rotates the cube and calculates the model and view matrices.
@@ -70,12 +67,13 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 {
 	if (!m_tracking)
 	{
+		XMStoreFloat4x4(&m_constantBufferData.view, CustomViews::Views[(static_cast<unsigned long long>(timer.GetTotalSeconds())/5)%CustomViews::Views.size()]);
 		// Convert degrees to radians, then convert seconds to rotation angle
 		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
 		double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
 		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
 		Rotate(radians);
-		Oscilate(radians);
+		Oscilate(radians, m_pathLenght);
 	}
 }
 
@@ -85,9 +83,9 @@ void Sample3DSceneRenderer::Rotate(float radians)
 	// Prepare to pass the updated model matrix to the shader
 	//XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationY(radians)));
 }
-void Sample3DSceneRenderer::Oscilate(float radians) {
+void Sample3DSceneRenderer::Oscilate(float radians, float pathLenght) {
 	// Prepare to pass the updated model matrix to the shader
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixTranslation(sinf(radians) , 0, 0)));
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixTranslation(sinf(radians)* pathLenght, 0, 0)));
 }
 void Sample3DSceneRenderer::StartTracking()
 {
@@ -101,7 +99,7 @@ void Sample3DSceneRenderer::TrackingUpdate(float positionX)
 	{
 		float radians = XM_2PI * 2.0f * positionX / m_deviceResources->GetOutputSize().Width;
 		Rotate(radians);
-		Oscilate(radians);
+		Oscilate(radians, m_pathLenght);
 	}
 }
 
@@ -396,15 +394,6 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 			);
 	});
 
-	// Specify the view transform corresponding to a camera position of
-	// X = 0, Y = 1, Z = 2.  For a generalized camera class, see Lesson 5.
-
-	m_constantBufferData.view = DirectX::XMFLOAT4X4(
-		-1.00000000f, 0.00000000f, 0.00000000f, 0.00000000f,
-		0.00000000f, 0.89442718f, 0.44721359f, 0.00000000f,
-		0.00000000f, 0.44721359f, -0.89442718f, -2.23606800f,
-		0.00000000f, 0.00000000f, 0.00000000f, 1.00000000f
-	);
 
 	// Once the cube is loaded, the object is ready to be rendered.
 	createCubeTask.then([this] () {

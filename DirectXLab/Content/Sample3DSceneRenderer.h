@@ -24,7 +24,7 @@ namespace DirectXLab
 
 	private:
 		void Rotate(float radians);
-		void Oscilate(float radians);
+		void Oscilate(float radians, float pathLenght);
 
 	private:
 		// Cached pointer to device resources.
@@ -47,7 +47,9 @@ namespace DirectXLab
 		// Variables used with the rendering loop.
 		bool	m_loadingComplete;
 		float	m_degreesPerSecond;
+		float	m_pathLenght;
 		bool	m_tracking;
+		size_t viewNumber;
 	};
 }
 

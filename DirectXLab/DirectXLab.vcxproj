@@ -263,6 +263,7 @@
     <ClInclude Include="Content\ShaderStructures.h" />
     <ClInclude Include="Octaedr.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Views.h" />
     <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
