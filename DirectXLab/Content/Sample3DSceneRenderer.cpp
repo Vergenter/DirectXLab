@@ -241,12 +241,14 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 		// Load mesh vertices. Each vertex has a position and a color.
 		static const VertexPositionColor cubeVertices[] = 
 		{
-			{XMFLOAT3(0.f, 0.5f, 0.f), XMFLOAT3(0.0f, 1.0f, 0.0f)},
-			{XMFLOAT3(0.f, 0.f,  -0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f)},
-			{XMFLOAT3(-0.5f, 0.f, 0.f), XMFLOAT3(0.5f, 0.5f, 0.5f)},
-			{XMFLOAT3(0.f,  0.f, 0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f)},
-			{XMFLOAT3(0.5f, 0.f, 0.f), XMFLOAT3(0.5f, 0.5f, 0.5f)},
-			{XMFLOAT3(0.f, -0.5f, 0.f), XMFLOAT3(1.0f, 0.0f, 0.0f)},
+			{XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(0.0f, 0.0f, 0.0f)},
+			{XMFLOAT3(-0.5f, -0.5f,  0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f)},
+			{XMFLOAT3(-0.5f,  0.5f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f)},
+			{XMFLOAT3(-0.5f,  0.5f,  0.5f), XMFLOAT3(0.0f, 1.0f, 1.0f)},
+			{XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT3(1.0f, 0.0f, 0.0f)},
+			{XMFLOAT3(0.5f, -0.5f,  0.5f), XMFLOAT3(1.0f, 0.0f, 1.0f)},
+			{XMFLOAT3(0.5f,  0.5f, -0.5f), XMFLOAT3(1.0f, 1.0f, 0.0f)},
+			{XMFLOAT3(0.5f,  0.5f,  0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f)},
 		};
 
 		D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
@@ -267,19 +269,25 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 		// For example: 0,2,1 means that the vertices with indexes
 		// 0, 2 and 1 from the vertex buffer compose the 
 		// first triangle of this mesh.
-		static const unsigned short cubeIndices [] =
+		static const unsigned short cubeIndices[] =
 		{
-			//which this order?
-			1,0,2, // -x
-			2,0,3,
-			3,0,4,
-			4,0,1,
+			0,2,1, // -x
+			1,2,3,
 
-			5,1,2, // -x
-			5,2,3,
-			5,3,4,
-			5,4,1,
+			4,5,6, // +x
+			5,7,6,
 
+			0,1,5, // -y
+			0,5,4,
+
+			2,6,7, // +y
+			2,7,3,
+
+			0,4,6, // -z
+			0,6,2,
+
+			1,3,7, // +z
+			1,7,5,
 		};
 
 		m_indexCount = ARRAYSIZE(cubeIndices);
